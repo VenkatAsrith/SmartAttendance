@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Supabase client library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.2/dist/umd/supabase.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JNTUH Attendance System - Supabase</title>
+    
+    <!-- 
+        IMPORTANT MANUAL STEP REQUIRED:
+        1. Go to this URL in your browser: 
+           https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.2/dist/umd/supabase.min.js
+        2. Copy ALL the minified JavaScript code from that page.
+        3. Paste that entire code block directly below this comment, 
+           REPLACING the line that says "// PASTE SUPABASE.MIN.JS CONTENT HERE (Remove this line after pasting)".
+        This will embed the library directly and bypass any network issues.
+    -->
+    <!-- Supabase client library will be loaded from CDN in the main script -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        /* General Reset and Font */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* Body Styling */
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Background Slideshow */
+        .background-slideshow {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .background-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            animation: slideshow 24s linear infinite;
+            filter: blur(8px) brightness(0.7);
+        }
+
+        /* Specific background images for slideshow */
+        .background-slide:nth-child(1) {
+            background-image: url('https://cache.careers360.mobi/media/colleges/social-media/media-gallery/26854/2019/11/6/Campus%20View%20of%20JNTUH%20College%20of%20Engineering%20Sultanpur_Campus-View.jpg');
+            animation-delay: 0s;
+            transform-origin: center;
+            transition: transform 0.5s ease-out;
+        }
+
+        .background-slide:nth-child(2) {
+            background-image: url('https://cache.careers360.mobi/media/colleges/social-media/media-gallery/26854/2019/11/6/College%20Building%20of%20JNTUH%20College%20of%20Engineering%20Sultanpur_Campus-View.jpg');
+            animation-delay: 8s;
+            transform-origin: center;
+            transition: transform 0.5s ease-out;
+        }
+
+        .background-slide:nth-child(3) {
+            background-image: url('https://www.careers360.com/articles/images/article/1631185856_JNTUH.jpg');
+            animation-delay: 16s;
+            transform-origin: center;
+            transition: transform 0.5s ease-out;
+        }
+
+        /* Slideshow Animation */
+        @keyframes slideshow {
+            0%, 25% {
+                opacity: 0;
+                transform: scale(1.1) rotate(1deg);
+            }
+            33%, 58% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+            66%, 100% {
+                opacity: 0;
+                transform: scale(1.1) rotate(-1deg);
+            }
+        }
+
+        /* Main Container Styling */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.92);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Header Styling */
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .header img {
+            width: 150px;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+
+        /* Form Layout */
+        .form-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .form-group:hover {
+            transform: translateY(-2px);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.8rem;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            border-color: #0066cc;
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+            outline: none;
+        }
+
+        /* Checkbox Container for Students */
+        .checkbox-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            scrollbar-width: thin;
+            scrollbar-color: #0066cc #f0f0f0;
+        }
+
+        /* Custom Scrollbar for Checkbox Container */
+        .checkbox-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .checkbox-container::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+
+        .checkbox-container::-webkit-scrollbar-thumb {
+            background: #0066cc;
+            border-radius: 4px;
+        }
+
+        .checkbox-container::-webkit-scrollbar-thumb:hover {
+            background: #0052a3;
+        }
+
+        /* Custom radio button styling for hours */
+        .hours-selection input[type="radio"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            margin-right: 10px;
+            position: relative;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .hours-selection input[type="radio"]:checked {
+            border-color: #0066cc;
+            background-color: #0066cc;
+        }
+
+        .hours-selection input[type="radio"]:checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: white;
+        }
+
+        .hours-selection label {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+            cursor: pointer;
+        }
+
+        /* Success popup styling */
+        .success-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            z-index: 1000;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            display: none;
+        }
+
+        .success-popup.show {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .success-popup .icon {
+            font-size: 50px;
+            color: #4CAF50;
+            margin-bottom: 15px;
+        }
+
+        .success-popup h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .success-popup .close-btn {
+            display: inline-block;
+            padding: 8px 20px;
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: background-color 0.3s;
+        }
+
+        .success-popup .close-btn:hover {
+            background-color: #0052a3;
+        }
+
+        /* Loading indicator styles */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: white;
+        }
+
+        .loading-overlay .loader {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        /* Individual Checkbox Item Styling */
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem 1rem;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .checkbox-item:hover {
+            background: #f0f7ff;
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0, 102, 204, 0.15);
+            border-color: #0066cc;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            position: relative;
+            border: 2px solid #0066cc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            background: white;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked {
+            background: #0066cc;
+            border-color: #0066cc;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 14px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .roll-number {
+            font-weight: 600;
+            color: #333;
+            min-width: 100px;
+            background: rgba(0, 102, 204, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .student-name {
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover .roll-number {
+            background: rgba(0, 102, 204, 0.2);
+        }
+
+        .checkbox-item:hover .student-name {
+            color: #333;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked + label .roll-number {
+            color: #0066cc;
+        }
+
+        .checkbox-item input[type="checkbox"]:checked + label .student-name {
+            color: #4CAF50;
+            font-weight: 500;
+        }
+
+        /* Select All Checkbox Container */
+        .select-all-container {
+            margin-bottom: 1rem;
+            padding: 0.8rem;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .select-all-container input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .select-all-container label {
+            font-weight: 600;
+            color: #333;
+            cursor: pointer;
+        }
+
+        /* Radio Button Container */
+        .radio-container {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .radio-option:hover {
+            border-color: #0066cc;
+            background: #f0f7ff;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        /* Submit Button Styling */
+        .submit-btn-container {
+            position: relative;
+            margin: 2rem auto;
+            text-align: center;
+        }
+
+        .submit-btn {
+            background: linear-gradient(45deg, #0066cc, #0052a3);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 102, 204, 0.2);
+            position: relative;
+            overflow: hidden;
+            margin-top: 2rem;
+            display: inline-block;
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 102, 204, 0.3);
+            background: linear-gradient(45deg, #0052a3, #003d7a);
+        }
+        
+        .submit-btn::after {
+            content: '✓';
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover::after {
+            opacity: 1;
+        }
+
+        /* Navigation Buttons */
+        .navigation-buttons {
+            display: none; /* Initially hidden, shown after submit or view */
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+        }
+
+        .nav-btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 10px; /* Add some space between wrapped buttons */
+        }
+
+        .home-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .exit-btn {
+            background: linear-gradient(45deg, #f44336, #e53935);
+            color: white;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Truncate long student names */
+        .checkbox-item label {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 200px; /* Adjust as needed */
+        }
+
+        /* Success Animation (Checkmark) */
+        .success-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            display: none; /* Initially hidden */
+            z-index: 1001; /* Ensure it's above other elements */
+            backdrop-filter: blur(5px);
+        }
+
+        .checkmark {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 2;
+            stroke: #4CAF50;
+            stroke-miterlimit: 10;
+            margin: 0 auto;
+            animation: fill_anim 0.4s ease-in-out 0.4s forwards, scale_anim 0.3s ease-in-out 0.9s both;
+        }
+
+        .checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 2;
+            stroke-miterlimit: 10;
+            stroke: #4CAF50;
+            fill: none;
+            animation: stroke_anim 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke_anim 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+
+        @keyframes stroke_anim {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes scale_anim {
+            0%, 100% {
+                transform: none;
+            }
+            50% {
+                transform: scale3d(1.1, 1.1, 1);
+            }
+        }
+
+        @keyframes fill_anim {
+            100% {
+                box-shadow: inset 0 0 0 30px #4CAF50;
+            }
+        }
+
+        /* Results table styles */
+        .results-container {
+            margin-top: 2rem;
+            display: none; /* Initially hidden */
+            animation: fadeInResults 0.5s ease;
+        }
+
+        @keyframes fadeInResults {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 1rem;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 0.8rem 1rem;
+            border: 1px solid #e0e0e0;
+            text-align: left;
+        }
+
+        .results-table th {
+            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        .results-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .results-table tr:hover {
+            background-color: #f0f7ff;
+        }
+
+        .results-table td:nth-child(4) { /* Status column */
+            font-weight: 600;
+        }
+
+        .results-table td[data-status="present"] {
+            color: #4CAF50;
+        }
+
+        .results-table td[data-status="absent"] {
+            color: #f44336;
+        }
+
+        .date-display {
+            text-align: right;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        /* Animation for checkbox items */
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .checkbox-item {
+            animation: fadeInScale 0.3s ease forwards;
+        }
+        .checkbox-item:nth-child(odd) {
+            animation-delay: 0.05s;
+        }
+        .checkbox-item:nth-child(even) {
+            animation-delay: 0.1s;
+        }
+
+        /* Fast actions styling */
+        .fast-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .action-btn {
+            background: linear-gradient(135deg, #2B4570, #1A2A45);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .action-btn:hover {
+            background: linear-gradient(135deg, #1A2A45, #0c1522);
+            transform: translateY(-2px);
+        }
+
+        /* Simplified loading bar */
+        .loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%; /* Controlled by JS */
+            height: 3px;
+            background: linear-gradient(to right, #4CAF50, #2196F3);
+            z-index: 9999;
+            transition: width 0.2s ease-out;
+        }
+        .status-message {
+            text-align: center;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-weight: bold;
+            display: none; /* Hidden by default */
+        }
+        .status-message.info { color: black; background-color: #e0f2f7; }
+        .status-message.success { color: green; background-color: #e8f5e9; }
+        .status-message.error { color: red; background-color: #ffebee; }
+
+        /* LLM Summary Output Styling */
+        #llmSummaryOutput {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #e6f7ff;
+            border-radius: 10px;
+            border: 1px solid #91d5ff;
+            display: none; /* Hidden by default */
+            box-shadow: 0 4px 10px rgba(0, 102, 204, 0.1);
+            animation: fadeIn 0.5s ease-out;
+        }
+        #llmSummaryOutput h4 {
+            color: #0056b3;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        #llmSummaryOutput p {
+            color: #333;
+            line-height: 1.6;
+            white-space: pre-wrap; /* Preserve line breaks from LLM output */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="loading-bar" id="loadingBar"></div>
+
+    <div class="background-slideshow">
+        <div class="background-slide"></div>
+        <div class="background-slide"></div>
+        <div class="background-slide"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <img src="jntuhlogo.jpg" alt="JNTUH Logo" style="width: 100px; height: auto; margin-bottom: 1rem;">
+            <div>
+                <h1>JNTUH Attendance System</h1>
+                <p>Faculty Portal</p>
+            </div>
+            <div class="date-display" id="currentDate"></div>
+        </div>
+        <div id="statusMessage" class="status-message"></div>
+
+
+        <div class="form-container">
+            <div class="form-group">
+                <label for="subject">Select Subject</label>
+                <select id="subject" name="subject" required>
+                    <option value="">Select a subject</option>
+                    <option value="discrete_maths">Discrete Mathematics</option>
+                    <option value="business_economics">Business Economics and Financial Administration</option>
+                    <option value="operating_systems">Operating Systems</option>
+                    <option value="dbms">Database Management Systems</option>
+                    <option value="software_engineering">Software Engineering</option>
+                    <option value="os_lab">Operating Systems Lab</option>
+                    <option value="dbms_lab">DBMS Lab</option>
+                    <option value="rtrp">RTRP</option>
+                    <option value="nrd_lab">NRD Lab</option>
+                    <option value="constitution">Constitution of India</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="hoursSelection">Select Hours</label>
+                <div class="hours-selection" id="hoursSelection">
+                    <label><input type="radio" name="hours" value="1" checked> 1st Hour</label>
+                    <label><input type="radio" name="hours" value="2"> 2nd Hour</label>
+                    <label><input type="radio" name="hours" value="3"> 3rd Hour</label>
+                </div>
+            </div>
+
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label>Mark Attendance</label>
+                <div class="fast-actions">
+                    <button id="markAllPresent" class="action-btn">Mark All Present</button>
+                    <button id="markAllAbsent" class="action-btn">Mark All Absent</button>
+                </div>
+                <div class="checkbox-container" id="rollNumberContainer">
+                    <p style="text-align: center; color: #555;">Initializing application... Please wait.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="submit-btn-container">
+            <button class="submit-btn" onclick="handleFastSubmitAttendance()">Submit Attendance</button>
+            <button class="submit-btn" onclick="handleFastViewAttendance()" style="background-color: #2B4570;">View Attendance History</button>
+        </div>
+        
+        <div class="success-animation" id="successTickAnimation">
+            <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+            </svg>
+            <h3>Processing Successful!</h3>
+        </div>
+
+
+        <div class="navigation-buttons" id="mainNavigationButtons">
+            <button class="nav-btn home-btn" onclick="window.location.reload()">
+                <span>🏠</span> Home / New
+            </button>
+            <button class="nav-btn" style="background: linear-gradient(45deg, #4CAF50, #388E3C);" onclick="downloadCurrentReportAsExcel()">
+                <span>📥</span> Download Displayed Report
+            </button>
+            <button class="nav-btn exit-btn" onclick="window.close()">
+                <span>🚪</span> Exit (Close Tab)
+            </button>
+        </div>
+        
+        <div class="results-container" id="mainResultsContainer">
+            </div>
+
+    </div>
+
+    <div class="success-popup" id="genericSuccessPopup">
+        <div class="icon">✓</div>
+        <h3 id="successPopupTitle">Success!</h3>
+        <p id="successPopupMessage">Operation completed successfully.</p>
+        <button class="close-btn" onclick="closeGenericSuccessPopup()">Close</button>
+    </div>
+
+    <script>
+        // --- Supabase Configuration ---
+        // Supabase Project URL and Service Role Key
+        const SUPABASE_URL = 'https://trroxlaourgjylaeemnf.supabase.co';
+        // WARNING: In a production environment, never expose the service role key in client-side code
+        // This should be moved to a server-side API in production
+        const SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycm94bGFvdXJnanlsYWVlbW5mIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NzM4MDYzMCwiZXhwIjoyMDYyOTU2NjMwfQ.o7mpRY5NzkaCY4Ullyh4vInFy1Q9FtSbR-lpOegdo68'; // Replace with your actual service role key
+        
+        // Global variables
+        let supabase = null;
+        let currentAttendanceAggregates = []; // Stores fetched attendance data for LLM
+        let studentMasterData = {}; // Cache for student data
+
+        // Initialize Supabase client
+        async function initializeSupabase() {
+            try {
+                // If already initialized, return the existing client
+                if (supabase) {
+                    console.log('Supabase client already initialized');
+                    return supabase;
+                }
+
+                // Check if Supabase is already loaded
+                if (!window.supabase) {
+                    console.log('Loading Supabase client library...');
+                    await new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.2/dist/umd/supabase.min.js';
+                        script.async = true;
+                        script.onload = resolve;
+                        script.onerror = () => reject(new Error('Failed to load Supabase library'));
+                        document.head.appendChild(script);
+                    });
+                }
+                
+                if (!window.supabase) {
+                    throw new Error('Supabase library not loaded');
+                }
+
+                // Initialize the client with service role key (for server-side use only)
+                // WARNING: In production, this should be moved to a server-side API
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+                    auth: {
+                        persistSession: false,
+                        autoRefreshToken: false,
+                        detectSessionInUrl: false
+                    },
+                    global: {
+                        headers: {
+                            'apikey': SUPABASE_SERVICE_ROLE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`
+                        }
+                    }
+                });
+
+                // Test the connection
+                const { data, error } = await supabase
+                    .from('students')
+                    .select('count', { count: 'exact', head: true });
+                
+                if (error) {
+                    console.error('Supabase connection test failed:', error);
+                    throw new Error(`Database connection failed: ${error.message}`);
+                }
+
+                console.log('Supabase client initialized successfully');
+                showStatusMessage('Connected to database', 'success');
+                return supabase;
+                
+            } catch (error) {
+                console.error('Error initializing Supabase client:', error);
+                showStatusMessage('Error connecting to database. Please check your connection and refresh.', 'error');
+                throw error; // Re-throw to allow calling code to handle the error
+            }
+        }
+        
+        // Initialize Supabase when the page loads
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                await initializeSupabase();
+                // Enable submit button after successful initialization
+                const submitBtn = document.querySelector('button[onclick="handleFastSubmitAttendance()"]');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Attendance';
+                }
+            } catch (error) {
+                console.error('Failed to initialize Supabase:', error);
+                showStatusMessage('Failed to initialize database. Please refresh the page.', 'error');
+            }
+        });
+
+        // Initial student data (used for one-time population if Supabase `students` table is empty)
+        const initialStudentData = {
+            '23SS1A0501': 'ABDUL AHAD', '23SS1A0502': 'ANURADHA KUMARI JHA', '23SS1A0503': 'ARRAMONI ARAVIND', '23SS1A0504': 'ARUTLA ETTI HARSHINI', '23SS1A0505': 'AZMEERA MANJU', '23SS1A0506': 'BALARAPU ABHISHA', '23SS1A0507': 'BATANI RAVINDRANATH', '23SS1A0508': 'BEKKANTI VISHWAS', '23SS1A0509': 'BHUTHAM SRIKANTH', '23SS1A0510': 'BOINAPALLI MIDILESH VARDHAN', '23SS1A0511': 'BOLLI HARIKA', '23SS1A0512': 'BYRRAJU NAREN VARMA', '23SS1A0513': 'CHADUVULA MITHIL REDDY', '23SS1A0514': 'DAMMU PRAVEEN KUMAR', '23SS1A0515': 'DARA PRAKSHITH KUMAR', '23SS1A0516': 'DARA SINDHUJA', '23SS1A0517': 'DASARI SAI PRASANNA', '23SS1A0518': 'GANDAMALLA ANJALI', '23SS1A0519': 'GANGAVATH MANEESHA', '23SS1A0520': 'GHANAPURAM DHARANI', '23SS1A0521': 'GOLLA MEENA BHAVANI', '23SS1A0522': 'GOLLA SAI PRIYA', '23SS1A0523': 'GOPAGONI RENUKA', '23SS1A0524': 'GUDURU LAXMI NIHAL VARMA', '23SS1A0525': 'GUGULOTH HIMAVARSHINI', '23SS1A0526': 'GURRALA THANSHITHA', '23SS1A0527': 'KAKANI SAI SATHISH', '23SS1A0528': 'KANAKARAJU SUDHA', '23SS1A0529': 'KARNE VISHWANATH', '23SS1A0530': 'KARRI ENOSH', '23SS1A0531': 'KASOJU POOJITHA', '23SS1A0532': 'KODEM AJAY RAGHAVA', '23SS1A0533': 'KOLICHELMA BINDU SRI', '23SS1A0534': 'KOLUVULA ANIL KUMAR', '23SS1A0535': 'KONAM VENKAT ASRITH', '23SS1A0536': 'KONGARI NAKSHITHA', '23SS1A0537': 'KOVAGANI JAYASRAVAN', '23SS1A0538': 'LAGALA VARUN', '23SS1A0539': 'LODE SANKEERTHANA', '23SS1A0540': 'MALOTH SINDHUSHA', '23SS1A0541': 'MARA NIVEDITHA', '23SS1A0542': 'MUDAVATH RAJESH', '23SS1A0543': 'MULA VARSHITHA REDDY', '23SS1A0544': 'MUNJAM SAI KIRAN', '23SS1A0545': 'NAKKA BHARATH CHANDRA', '23SS1A0546': 'NIMMANAGOTI RAJARAJESHWARI', '23SS1A0547': 'PAGIDIPALA KEERTHI', '23SS1A0548': 'PAMMI KOMALI KAVYA', '23SS1A0549': 'PAWAR AMRUTHA', '23SS1A0550': 'PENDLA SUNNY', '23SS1A0551': 'RACHURI ANILKUMAR', '23SS1A0552': 'REKHANDAR SHARATH CHANDRA', '23SS1A0553': 'RENIKUNTLA HARINI', '23SS1A0554': 'SARVANI LAXMI PRASANNA', '23SS1A0555': 'SHAIK ABBU SOFIYAN', '23SS1A0556': 'SHAIK AFREEN', '23SS1A0557': 'SILIVERU ABHILASH', '23SS1A0558': 'SUREPALLY UMA MAHESHWARI', '23SS1A0559': 'SURYAWANSHI LOKESH GIRISH', '23SS1A0560': 'THAGULLA HARSHITH SAINADH', '23SS1A0561': 'THANGALLAPALLI RAHITHYA', '23SS1A0562': 'VADATHYA JAIRAM', '23SS1A0563': 'VADLA GOVARDHAN', '23SS1A0564': 'VAISHNAVI GURRAMKONDA', '23SS1A0565': 'VANARASI GOURI', '23SS1A0566': 'VETTI OOHA SRI'
+        };
+
+        // Maps dropdown value to Supabase column prefix for attendance hours
+        const subjectKeyMap = {
+            'discrete_maths': 'discrete_maths',
+            'business_economics': 'business_economics',
+            'operating_systems': 'operating_systems',
+            'dbms': 'dbms',
+            'software_engineering': 'software_engineering',
+            'os_lab': 'os_lab',
+            'dbms_lab': 'dbms_lab',
+            'rtrp': 'rtrp',
+            'nrd_lab': 'nrd_lab',
+            'constitution': 'constitution'
+        };
+
+        // --- UI Helper Functions ---
+        /**
+         * Shows or hides the loading bar at the top of the page.
+         * @param {boolean} show - True to show, false to hide.
+         * @param {number} progress - Progress percentage (0-100) when showing.
+         */
+        function showLoadingBar(show = true, progress = 0) {
+            const bar = document.getElementById('loadingBar');
+            if (bar) {
+                if (show) {
+                    bar.style.width = progress + '%';
+                } else {
+                    bar.style.width = '0%';
+                }
+            }
+        }
+
+        /**
+         * Displays a status message to the user.
+         * @param {string} message - The message to display.
+         * @param {'info'|'success'|'error'} type - The type of message (influences styling).
+         */
+        function showStatusMessage(message, type = 'info') {
+            const msgDiv = document.getElementById('statusMessage');
+            if (msgDiv) {
+                msgDiv.textContent = message;
+                msgDiv.className = `status-message ${type}`; // Apply class for styling
+                msgDiv.style.display = 'block';
+                if (type !== 'error') { // Auto-hide for info/success messages after 3 seconds
+                    setTimeout(() => msgDiv.style.display = 'none', 3000);
+                }
+            }
+        }
+
+        /**
+         * Shows the success tick animation.
+         */
+        function showSuccessTickAnimation() {
+            const anim = document.getElementById('successTickAnimation');
+            if (anim) {
+                anim.style.display = 'flex'; // Use flex to center content
+                setTimeout(() => {
+                    anim.style.display = 'none';
+                }, 2000); // Hide after 2 seconds
+            }
+        }
+
+        /**
+         * Shows a generic success popup with a title and message.
+         * @param {string} title - The title for the popup.
+         * @param {string} message - The message content for the popup.
+         */
+        function showGenericSuccessPopup(title, message) {
+            const popup = document.getElementById('genericSuccessPopup');
+            if (popup) {
+                document.getElementById('successPopupTitle').textContent = title;
+                document.getElementById('successPopupMessage').textContent = message;
+                popup.classList.add('show');
+            }
+        }
+
+        /**
+         * Closes the generic success popup.
+         */
+        function closeGenericSuccessPopup() {
+            const popup = document.getElementById('genericSuccessPopup');
+            if (popup) {
+                popup.classList.remove('show');
+            }
+        }
+
+        /**
+         * Displays the current date in the header.
+         */
+        function displayCurrentDate() {
+            const date = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateElement = document.getElementById('currentDate');
+            if (dateElement) {
+                dateElement.textContent = date.toLocaleDateString('en-US', options);
+            }
+        }
+
+        // --- Supabase Helper: One-time student population ---
+        /**
+         * Populates initial student data into the 'students' table in Supabase.
+         * This function should be called manually (e.g., from console) if the table is empty.
+         * It uses 'upsert' to avoid duplicating existing students.
+         *
+         * Expected Supabase 'students' table schema:
+         * - roll_number (TEXT, PRIMARY KEY)
+         * - name (TEXT)
+         * - discrete_maths_present_hours (INTEGER, default 0)
+         * - discrete_maths_total_hours (INTEGER, default 0)
+         * - ... (similar pairs for all subjects in subjectKeyMap)
+         * - overall_present_hours (INTEGER, default 0)
+         * - overall_total_hours (INTEGER, default 0)
+         */
+        async function populateInitialStudentsToSupabase() {
+            if (!supabase) {
+                showStatusMessage('Supabase not initialized. Cannot populate students.', 'error');
+                return;
+            }
+            showStatusMessage('Attempting to populate initial student data to Supabase...');
+            const studentsToInsert = Object.entries(initialStudentData).map(([roll, name]) => ({
+                roll_number: roll,
+                name: name,
+                // Initialize all subject hours to 0, matching the suggested schema
+                discrete_maths_present_hours: 0, discrete_maths_total_hours: 0,
+                business_economics_present_hours: 0, business_economics_total_hours: 0,
+                operating_systems_present_hours: 0, operating_systems_total_hours: 0,
+                dbms_present_hours: 0, dbms_total_hours: 0,
+                software_engineering_present_hours: 0, software_engineering_total_hours: 0,
+                os_lab_present_hours: 0, os_lab_total_hours: 0,
+                dbms_lab_present_hours: 0, dbms_lab_total_hours: 0,
+                rtrp_present_hours: 0, rtrp_total_hours: 0,
+                nrd_lab_present_hours: 0, nrd_lab_total_hours: 0,
+                constitution_present_hours: 0, constitution_total_hours: 0,
+                overall_present_hours: 0,
+                overall_total_hours: 0
+            }));
+
+            try {
+                // Upsert to avoid errors if students already exist and to add new ones.
+                // 'roll_number' is the conflict target.
+                const { data, error } = await supabase.from('students').upsert(studentsToInsert, { onConflict: 'roll_number' }).select();
+                if (error) throw error;
+                showStatusMessage(`Successfully populated/updated ${data ? data.length : 0} students in Supabase. Please refresh.`, 'success');
+                console.log('Initial student data populated/updated in Supabase:', data);
+            } catch (err) {
+                showStatusMessage(`Error populating students: ${err.message}`, 'error');
+                console.error('Error populating students to Supabase:', err);
+            }
+        }
+        // You can call this from your browser's console to populate initial data: populateInitialStudentsToSupabase();
+
+        // --- Student List Population ---
+        /**
+         * Fetches student roll numbers and names from Supabase and populates the checkbox container.
+         */
+        async function speedPopulateStudents() {
+            if (!supabase) {
+                document.getElementById('rollNumberContainer').innerHTML = '<p style="color:red;">Supabase not initialized. Cannot load students.</p>';
+                return;
+            }
+            showLoadingBar(true, 10);
+            document.getElementById('rollNumberContainer').innerHTML = '<p>Fetching student data from Supabase...</p>';
+
+            try {
+                const { data: students, error } = await supabase.from('students').select('roll_number, name').order('roll_number');
+                if (error) throw error;
+                showLoadingBar(true, 50);
+
+                studentMasterData = {}; // Reset global cache
+                students.forEach(s => {
+                    studentMasterData[s.roll_number] = s.name;
+                });
+
+                const container = document.getElementById('rollNumberContainer');
+                if (!container) {
+                    console.error('rollNumberContainer not found');
+                    showLoadingBar(false);
+                    return;
+                }
+                
+                if (students.length === 0) {
+                    container.innerHTML = '<p style="color:orange;">No students found in Supabase. Consider populating initial data.</p> <button onclick="populateInitialStudentsToSupabase()">Populate Initial Students</button>';
+                    showLoadingBar(false);
+                    return;
+                }
+
+                let html = '';
+                students.forEach(student => {
+                    html += `<div class="checkbox-item">
+                                <input type="checkbox" id="roll_${student.roll_number}" name="rollNumber" value="${student.roll_number}" data-name="${student.name}">
+                                <label for="roll_${student.roll_number}">
+                                    <span class="roll-number">${student.roll_number}</span>
+                                    <span class="student-name">${student.name}</span>
+                                </label>
+                             </div>`;
+                });
+                container.innerHTML = html;
+                showLoadingBar(false);
+            } catch (err) {
+                console.error('Error fetching students from Supabase:', err);
+                document.getElementById('rollNumberContainer').innerHTML = `<p style="color:red;">Error loading students: ${err.message}. Check console.</p>`;
+                showLoadingBar(false);
+            }
+        }
+
+        // --- Attendance Marking Helpers ---
+        /**
+         * Sets up event listeners for "Mark All Present" and "Mark All Absent" buttons.
+         */
+        function setupFastButtons() {
+            document.getElementById('markAllPresent')?.addEventListener('click', function() {
+                document.querySelectorAll('input[name="rollNumber"]').forEach(cb => cb.checked = true);
+            });
+            document.getElementById('markAllAbsent')?.addEventListener('click', function() {
+                document.querySelectorAll('input[name="rollNumber"]').forEach(cb => cb.checked = false);
+            });
+        }
+        
+        // --- Submit Attendance ---
+        /**
+         * Handles the submission of attendance data to Supabase.
+         * Saves a session record and updates individual student aggregates.
+         *
+         * Expected Supabase 'attendance_sessions' table schema:
+         * - id (UUID, PRIMARY KEY, default gen_random_uuid())
+         * - subject (TEXT)
+         */
+        async function handleFastSubmitAttendance() {
+            try {
+                // Ensure Supabase is properly initialized
+                if (!supabase) {
+                    console.log('Initializing Supabase client...');
+                    await initializeSupabase();
+                    if (!supabase) {
+                        throw new Error('Failed to initialize Supabase client');
+                    }
+                }
+                
+                console.log('Supabase client initialized:', !!supabase);
+                
+                // For security, we're using a service role key for this operation
+                // In a production environment, this should be handled by a server-side API
+                console.log('Using service role key for database operations');
+                
+                // Get form values with null checks
+                const subjectSelect = document.getElementById('subject');
+                const hourSelect = document.getElementById('hoursSelection');
+                
+                if (!subjectSelect || !hourSelect) {
+                    throw new Error('Required form elements not found. Please refresh the page.');
+                }
+                
+                const subject = subjectSelect.value;
+                const now = new Date();
+                const date = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+                const time = now.toTimeString().split(' ')[0]; // HH:MM:SS format
+                const selectedHour = hourSelect.querySelector('input[name="hours"]:checked')?.value || '1';
+                const hourNumber = parseInt(selectedHour, 10);
+
+                // Validate inputs
+                if (!subject || isNaN(hourNumber)) {
+                    throw new Error('Please select a subject before submitting.');
+                }
+
+                showLoadingBar(true, 10);
+                showStatusMessage('Preparing attendance data...', 'info');
+
+                // Collect attendance data
+                const checkboxes = document.querySelectorAll('input[name="rollNumber"]');
+                if (checkboxes.length === 0) {
+                    throw new Error('No students found to mark attendance for. Make sure student data is loaded.');
+                }
+
+                const attendanceData = [];
+                const presentRolls = [];
+                const absentRolls = [];
+                const fullAttendanceDataForSession = [];
+
+                // Process attendance data
+                const allRollNumbers = [];
+                checkboxes.forEach(checkbox => {
+                    const rollNumber = checkbox.value; // Get roll number from value attribute
+                    if (rollNumber) allRollNumbers.push(rollNumber);
+                });
+
+                if (allRollNumbers.length === 0) {
+                    throw new Error('No valid student roll numbers found. Make sure student data is loaded.');
+                }
+
+                // Process attendance data
+                checkboxes.forEach(checkbox => {
+                    const rollNumber = checkbox.value; // Get roll number from value attribute
+                    const studentName = checkbox.getAttribute('data-name') || 'Unknown';
+                    const isPresent = checkbox.checked;
+                    
+                    if (!rollNumber) {
+                        console.warn('Checkbox missing data-roll attribute:', checkbox);
+                        return; // Skip invalid entries
+                    }
+                    
+                    attendanceData.push({
+                        RollNo: rollNumber,
+                        Name: studentName,
+                        Status: isPresent ? 'Present' : 'Absent',
+                        Subject: subject,
+                        Date: date,
+                        Time: time,
+                        Hour: hourNumber
+                    });
+
+                    if (isPresent) {
+                        presentRolls.push(rollNumber);
+                    } else {
+                        absentRolls.push(rollNumber);
+                    }
+
+                    fullAttendanceDataForSession.push({
+                        RollNo: rollNumber,
+                        Name: studentName,
+                        Status: isPresent ? 'Present' : 'Absent'
+                    });
+                });
+
+                if (attendanceData.length === 0) {
+                    throw new Error('No valid attendance data to submit.');
+                }
+
+                showLoadingBar(true, 30);
+                showStatusMessage('Saving attendance session...', 'info');
+
+                // 1. Save the attendance session
+                const sessionRecord = {
+                    subject: subject,
+                    date: date,
+                    hour: hourNumber,
+                    timestamp: new Date().toISOString(),
+                    present_rolls: presentRolls,
+                    absent_rolls: absentRolls,
+                    full_attendance_data: fullAttendanceDataForSession,
+                    created_at: new Date().toISOString()
+                };
+
+                console.log('Submitting attendance session:', sessionRecord);
+                
+                try {
+                    // Start a transaction
+                    const { data: sessionData, error: sessionError } = await supabase
+                        .from('attendance_sessions')
+                        .insert([sessionRecord])
+                        .select();
+
+                    if (sessionError) throw sessionError;
+                    
+                    if (!sessionData || sessionData.length === 0) {
+                        throw new Error('No data returned after saving session');
+                    }
+                    
+                    console.log('Session saved successfully, now updating student records...', sessionData);
+                    
+                    if (!sessionData || sessionData.length === 0) {
+                        throw new Error('No data returned after saving session');
+                    }
+                } catch (error) {
+                    console.error('Error saving session:', error);
+                    if (error.code === '42501') {
+                        // If permission denied, try with RLS (Row Level Security) bypass
+                        console.log('Trying with RLS bypass...');
+                        const { data: bypassData, error: bypassError } = await supabase
+                            .from('attendance_sessions')
+                            .insert([sessionRecord], { returning: 'minimal' })
+                            .select()
+                            .single();
+                            
+                        if (bypassError) {
+                            console.error('RLS bypass failed:', bypassError);
+                            throw new Error('Insufficient permissions to save attendance. Please contact support.');
+                        }
+                        
+                        if (!bypassData) {
+                            throw new Error('No data returned after RLS bypass');
+                        }
+                        return bypassData;
+                    }
+                    throw error;
+                }
+                
+                console.log('Session saved successfully, now updating student records...');
+                console.log('1. Starting student records update process');
+                
+                showLoadingBar(true, 50);
+                showStatusMessage('Updating student records...', 'info');
+
+                // 1. First, ensure the students table exists and has the required columns
+                try {
+                    console.log('2. Checking students table access');
+                    // Check if students table exists and has required columns
+                    console.log('2a. Sending query to students table...');
+                    const { data: tableInfo, error: tableError } = await supabase
+                        .from('students')
+                        .select('*')
+                        .limit(1);
+
+                    console.log('2b. Query completed');
+                    
+                    if (tableError) {
+                        console.warn('2c. Students table error:', {
+                            message: tableError.message,
+                            code: tableError.code,
+                            details: tableError.details
+                        });
+                        throw new Error('Students table not properly set up. Please check your database.');
+                    }
+                    
+                    console.log('2d. Students table check passed');
+
+                    console.log('===== UPDATING STUDENT RECORDS =====');
+                
+                // Map subject names to database column names (exact match with schema)
+                const subjectToColumnMap = {
+                    'Discrete Mathematics': {
+                        present: 'discrete_maths_present_hours',
+                        total: 'discrete_maths_total_hours'
+                    },
+                    'Business Economics': {
+                        present: 'business_economics_present_hours',
+                        total: 'business_economics_total_hours'
+                    },
+                    'Operating Systems': {
+                        present: 'operating_systems_present_hours',
+                        total: 'operating_systems_total_hours'
+                    },
+                    'DBMS': {
+                        present: 'dbms_present_hours',
+                        total: 'dbms_total_hours'
+                    },
+                    'Software Engineering': {
+                        present: 'software_engineering_present_hours',
+                        total: 'software_engineering_total_hours'
+                    },
+                    'OS Lab': {
+                        present: 'os_lab_present_hours',
+                        total: 'os_lab_total_hours'
+                    },
+                    'DBMS Lab': {
+                        present: 'dbms_lab_present_hours',
+                        total: 'dbms_lab_total_hours'
+                    },
+                    'RTRP': {
+                        present: 'rtrp_present_hours',
+                        total: 'rtrp_total_hours'
+                    },
+                    'NRD Lab': {
+                        present: 'nrd_lab_present_hours',
+                        total: 'nrd_lab_total_hours'
+                    },
+                    'Constitution': {
+                        present: 'constitution_present_hours',
+                        total: 'constitution_total_hours'
+                    }
+                };
+
+                // Map of subject keys to their display names
+                const subjectDisplayNames = {
+                    'discrete_maths': 'Discrete Mathematics',
+                    'business_economics': 'Business Economics',
+                    'operating_systems': 'Operating Systems',
+                    'dbms': 'DBMS',
+                    'software_engineering': 'Software Engineering',
+                    'os_lab': 'OS Lab',
+                    'dbms_lab': 'DBMS Lab',
+                    'rtrp': 'RTRP',
+                    'nrd_lab': 'NRD Lab',
+                    'constitution': 'Constitution'
+                };
+
+                // Find the matching subject key (case and underscore insensitive)
+                const normalizeKey = (key) => key.toLowerCase().replace(/_/g, '');
+                const subjectKey = Object.keys(subjectDisplayNames)
+                    .find(k => normalizeKey(k) === normalizeKey(subject));
+
+                if (!subjectKey) {
+                    const validSubjects = Object.values(subjectDisplayNames).join(', ');
+                    const error = `Invalid subject: "${subject}". Valid subjects are: ${validSubjects}`;
+                    console.error(error);
+                    throw new Error(error);
+                }
+
+                // Get the display name for the subject
+                const displayName = subjectDisplayNames[subjectKey];
+                const columns = subjectToColumnMap[displayName];
+                
+                if (!columns) {
+                    throw new Error(`No column mapping found for subject: ${displayName}`);
+                }
+
+                const { present: presentCol, total: totalCol } = columns;
+                const hoursToAdd = parseInt(selectedHour, 10) || 1;
+                
+                console.log('Subject columns:', { subject, presentCol, totalCol, hoursToAdd });
+                console.log(`Processing attendance for ${fullAttendanceDataForSession.length} students`);
+                
+                // Track successful updates and failures
+                let successCount = 0;
+                let errorCount = 0;
+                
+                // Process students in sequence to avoid overwhelming the database
+                for (let i = 0; i < fullAttendanceDataForSession.length; i++) {
+                    const testStudent = fullAttendanceDataForSession[i];
+                    const studentNumber = i + 1;
+                    
+                    if (!testStudent.RollNo) {
+                        console.warn(`[${studentNumber}/${fullAttendanceDataForSession.length}] Skipping student with missing roll number`);
+                        errorCount++;
+                        continue;
+                    }
+                    
+                    const isPresent = testStudent.Status === 'Present';
+                    const rollNumber = testStudent.RollNo;
+                    
+                    try {
+                        console.log(`[${studentNumber}/${fullAttendanceDataForSession.length}] Processing ${rollNumber} (${testStudent.Name || 'No Name'})`);
+                        
+                        // First, get the current student record to increment values
+                        const { data: currentData, error: fetchError } = await supabase
+                            .from('students')
+                            .select('*')
+                            .eq('roll_number', rollNumber)
+                            .single();
+
+                        if (fetchError && !fetchError.message.includes('No rows found')) {
+                            throw fetchError;
+                        }
+
+                        // Calculate new values by incrementing existing ones
+                        const currentTotal = currentData?.[totalCol] || 0;
+                        const currentPresent = currentData?.[presentCol] || 0;
+                        const currentOverallTotal = currentData?.overall_total_hours || 0;
+                        const currentOverallPresent = currentData?.overall_present_hours || 0;
+
+                        // Build the update data with incremented values
+                        const updateData = {
+                            roll_number: rollNumber,
+                            name: testStudent.Name || `Student ${rollNumber}`,
+                            [totalCol]: currentTotal + hoursToAdd,
+                            [presentCol]: isPresent ? (currentPresent + hoursToAdd) : currentPresent,
+                            overall_total_hours: currentOverallTotal + hoursToAdd,
+                            overall_present_hours: isPresent ? (currentOverallPresent + hoursToAdd) : currentOverallPresent,
+                            updated_at: new Date().toISOString()
+                        };
+                        
+                        console.log(`[${studentNumber}/${fullAttendanceDataForSession.length}] Updating ${rollNumber}:`, updateData);
+                        
+                        // Verify Supabase client is properly initialized
+                        if (!supabase) {
+                            throw new Error('Supabase client is not initialized');
+                        }
+                        
+                        // Update the student record
+                        const { error: updateError } = await supabase
+                            .from('students')
+                            .upsert(updateData, { 
+                                onConflict: 'roll_number',
+                                returning: 'minimal'
+                            });
+                            
+                        if (updateError) {
+                            console.error(`[${studentNumber}/${fullAttendanceDataForSession.length}] Error updating ${rollNumber}:`, updateError);
+                            throw updateError;
+                        }
+                        
+                        console.log(`[${studentNumber}/${fullAttendanceDataForSession.length}] Successfully updated ${rollNumber}`);
+                        successCount++;
+                        
+                        // Small delay between updates to avoid rate limiting
+                        if (i < fullAttendanceDataForSession.length - 1) {
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                        }
+                        
+                    } catch (error) {
+                        console.error(`[${studentNumber}/${fullAttendanceDataForSession.length}] Failed to update ${rollNumber}:`, error);
+                        errorCount++;
+                        // Continue with next student even if one fails
+                    }
+                }
+                
+                // Show summary of updates
+                const summary = `Updated ${successCount} student(s) successfully.`;
+                const errors = errorCount > 0 ? ` ${errorCount} student(s) had errors.` : '';
+                showStatusMessage(summary + errors, errorCount > 0 ? 'warning' : 'success');
+                console.log(`Update complete. ${successCount} succeeded, ${errorCount} failed.`);
+                
+                // Show success notification
+                showGenericSuccessPopup(
+                    'Attendance Submitted',
+                    `Successfully processed ${successCount} student(s).` + (errorCount > 0 ? ` ${errorCount} student(s) had errors.` : '')
+                );
+                
+                return;
+                
+                // Show loading complete and success animation
+                showLoadingBar(true, 100);
+                showSuccessTickAnimation();
+                
+                if (errorCount === 0) {
+                    showGenericSuccessPopup(
+                        '✅ Attendance Submitted',
+                        `Successfully updated attendance for ${successCount} students.`
+                    );
+                } else {
+                    const errorMessages = results
+                        .filter(r => !r.success)
+                        .map(r => `Student ${r.rollNumber}: ${r.error}`);
+                        
+                    console.error('Some updates failed:', errorMessages);
+                    
+                    showGenericSuccessPopup(
+                        '⚠️ Attendance Partially Submitted',
+                        `Updated ${successCount} students. ${errorCount} updates failed.`
+                    );
+                }
+                    
+                    // Reset form
+                    document.getElementById('mainNavigationButtons').style.display = 'flex';
+                    
+                } catch (error) {
+                    console.error('Error in attendance submission:', error);
+                    showGenericSuccessPopup(
+                        '❌ Error',
+                        'Attendance session was saved, but there was an error updating student records. Please check the console for details.'
+                    );
+                    throw error;
+                }
+
+
+            } catch (err) {
+                console.error('Error submitting attendance to Supabase:', err);
+                showStatusMessage(`Error: ${err.message}`, 'error');
+            } finally {
+                showLoadingBar(false); // Always hide loading bar
+            }
+        }
+        
+        /**
+         * Displays a summary table of the attendance just submitted for the current session.
+         * @param {Array<Object>} attendanceData - Array of student attendance objects for the session.
+         * @param {string} subject - The subject key.
+         * @param {string} date - The date of submission.
+         * @param {string} time - The time of submission.
+         * @param {number} hour - The hour of submission.
+         */
+        function displaySessionSubmissionSummary(attendanceData, subject, date, time, hour) {
+            const resultsContainer = document.getElementById('mainResultsContainer');
+            if (!resultsContainer) return;
+
+            resultsContainer.style.display = 'block';
+
+            const presentCount = attendanceData.filter(s => s.Status === 'Present').length;
+            const absentCount = attendanceData.length - presentCount;
+            const totalStudents = attendanceData.length;
+            const attendanceRate = totalStudents > 0 ? (presentCount / totalStudents * 100).toFixed(2) : 0;
+
+            let html = `<h3>Attendance Submission Summary</h3>
+                        <p><strong>Subject:</strong> ${formatSubjectName(subject)} | <strong>Date:</strong> ${date} | <strong>Time:</strong> ${time} | <strong>Hour:</strong> ${hour}</p>
+                        <div style="display:flex; justify-content:space-around; margin:15px 0;">
+                            <div>Present: <strong style="color:green;">${presentCount}</strong></div>
+                            <div>Absent: <strong style="color:red;">${absentCount}</strong></div>
+                            <div>Rate: <strong style="color:${attendanceRate >= 75 ? 'green' : 'red'};">${attendanceRate}%</strong></div>
+                        </div>
+                        <table class="results-table" id="currentSessionReportTable">
+                            <thead>
+                                <tr><th>Roll No</th><th>Name</th><th>Status</th></tr>
+                            </thead>
+                            <tbody>`;
+            attendanceData.forEach(student => {
+                html += `<tr>
+                            <td>${student.RollNo}</td>
+                            <td>${student.Name}</td>
+                            <td data-status="${student.Status.toLowerCase()}">${student.Status}</td>
+                         </tr>`;
+            });
+            html += `</tbody></table>`;
+            resultsContainer.innerHTML = html;
+            // Hide LLM summary when showing session summary
+            document.getElementById('llmSummaryOutput').style.display = 'none';
+        }
+
+
+        // --- View Attendance History ---
+        /**
+         * Fetches and displays the overall attendance history (aggregated data) for all students.
+         * Also stores this data globally for the LLM feature.
+         */
+        async function handleFastViewAttendance() {
+            if (!supabase) {
+                showStatusMessage('Supabase not initialized. Cannot view history.', 'error');
+                return;
+            }
+            showLoadingBar(true, 10);
+            showStatusMessage('Fetching attendance history...');
+            const resultsContainer = document.getElementById('mainResultsContainer');
+            if (!resultsContainer) return;
+
+            resultsContainer.innerHTML = '<p>Loading attendance data from Supabase...</p>';
+            resultsContainer.style.display = 'block';
+            
+            // Safely handle LLM summary element
+            const llmSummary = document.getElementById('llmSummaryOutput');
+            if (llmSummary) {
+                llmSummary.style.display = 'none'; // Hide previous LLM summary
+            }
+
+            try {
+                // Fetch all student master data (includes aggregates)
+                const { data: studentsAggregates, error: studentsError } = await supabase
+                    .from('students')
+                    .select('*') // Select all columns including aggregates
+                    .order('roll_number');
+
+                if (studentsError) throw studentsError;
+                showLoadingBar(true, 70);
+
+                // Store data globally for LLM feature
+                currentAttendanceAggregates = studentsAggregates;
+
+                if (!studentsAggregates || studentsAggregates.length === 0) {
+                    resultsContainer.innerHTML = '<p style="color:orange;">No student data found in Supabase to display history.</p>';
+                    showLoadingBar(false);
+                    return;
+                }
+
+                // Prepare for display
+                let html = `<h3>Overall Attendance Records</h3>
+                            <p style="margin-bottom:15px">Showing aggregated attendance for all students. 
+                            <span style="color:red; font-weight:bold">Red</span> indicates overall/subject attendance below 75%.</p>
+                            <div style="overflow-x:auto">
+                                <table class="results-table" id="fullAttendanceReportTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="position:sticky; left:0; background:#0052a3; z-index:2;">Roll No</th>
+                                            <th style="position:sticky; left:100px; background:#0052a3; z-index:2;">Name</th>`;
+                
+                const subjectDisplayOrder = ['discrete_maths', 'business_economics', 'operating_systems', 'dbms', 'software_engineering', 'os_lab', 'dbms_lab', 'rtrp', 'nrd_lab', 'constitution'];
+
+                subjectDisplayOrder.forEach(subjKey => {
+                    html += `<th colspan="3" style="text-align:center;">${formatSubjectName(subjKey)}</th>`;
+                });
+                html += `<th colspan="3" style="text-align:center;">Overall</th></tr>`;
+                
+                html += `<tr><th></th><th></th>`; // For Roll No, Name offset
+                subjectDisplayOrder.forEach(() => {
+                    html += `<th style="font-size:0.8em; text-align:center;">Pr.</th>
+                             <th style="font-size:0.8em; text-align:center;">Tot.</th>
+                             <th style="font-size:0.8em; text-align:center;">%</th>`;
+                });
+                html += `<th style="font-size:0.8em; text-align:center;">Pr.</th>
+                         <th style="font-size:0.8em; text-align:center;">Tot.</th>
+                         <th style="font-size:0.8em; text-align:center;">%</th></tr></thead><tbody>`;
+
+                studentsAggregates.forEach(student => {
+                    html += `<tr>
+                                <td style="position:sticky; left:0; background:white; z-index:1;">${student.roll_number}</td>
+                                <td style="position:sticky; left:100px; background:white; z-index:1;">${student.name}</td>`;
+                    
+                    subjectDisplayOrder.forEach(subjKey => {
+                        const present = student[`${subjKey}_present_hours`] || 0;
+                        const total = student[`${subjKey}_total_hours`] || 0;
+                        const perc = total > 0 ? ((present / total) * 100).toFixed(1) : 0;
+                        const color = perc >= 75 ? 'green' : (total > 0 ? 'red' : 'grey');
+                        html += `<td style="text-align:center;">${present}</td>
+                                 <td style="text-align:center;">${total}</td>
+                                 <td style="text-align:center; color:${color}; font-weight:bold;">${total > 0 ? perc + '%' : '-'}</td>`;
+                    });
+
+                    const overallPresent = student.overall_present_hours || 0;
+                    const overallTotal = student.overall_total_hours || 0;
+                    const overallPerc = overallTotal > 0 ? ((overallPresent / overallTotal) * 100).toFixed(1) : 0;
+                    const overallColor = overallPerc >= 75 ? 'green' : (overallTotal > 0 ? 'red' : 'grey');
+
+                    html += `<td style="text-align:center;">${overallPresent}</td>
+                             <td style="text-align:center;">${overallTotal}</td>
+                             <td style="text-align:center; color:${overallColor}; font-weight:bold;">${overallTotal > 0 ? overallPerc + '%' : '-'}</td>
+                             </tr>`;
+                });
+
+                html += `</tbody></table></div>
+                         <div id="llmSummaryOutput" style="margin-top: 2rem; padding: 1.5rem; background: #e6f7ff; border-radius: 10px; border: 1px solid #91d5ff; display: none;">
+                            <h4>AI-Generated Attendance Insights</h4>
+                            <p id="llmSummaryText">Loading insights...</p>
+                        </div>`; // Added LLM output div here
+                resultsContainer.innerHTML = html;
+                document.getElementById('mainNavigationButtons').style.display = 'flex';
+                showStatusMessage('Attendance history loaded.', 'success');
+
+            } catch (err) {
+                console.error('Error fetching attendance history from Supabase:', err);
+                resultsContainer.innerHTML = `<p style="color:red;">Error loading history: ${err.message}. Check console.</p>`;
+                showStatusMessage(`Error: ${err.message}`, 'error');
+            } finally {
+                showLoadingBar(false);
+            }
+        }
+
+        // --- LLM Integration: Generate Attendance Summary ---
+        /**
+         * Uses the Gemini API to generate a summary of attendance data.
+         * This function should be called after `handleFastViewAttendance` has populated `currentAttendanceAggregates`.
+         */
+        async function generateAttendanceSummaryLLM() {
+            if (!currentAttendanceAggregates || currentAttendanceAggregates.length === 0) {
+                showStatusMessage('No attendance data available to generate insights. Please view attendance history first.', 'info');
+                return;
+            }
+
+            const llmSummaryOutputDiv = document.getElementById('llmSummaryOutput');
+            const llmSummaryTextP = document.getElementById('llmSummaryText');
+            if (!llmSummaryOutputDiv || !llmSummaryTextP) {
+                console.error('LLM summary output elements not found in HTML.');
+                return;
+            }
+
+            llmSummaryOutputDiv.style.display = 'block';
+            llmSummaryTextP.textContent = 'Generating insights... Please wait.';
+            showLoadingBar(true, 10);
+            showStatusMessage('Generating AI insights...', 'info');
+
+            try {
+                // Prepare data for the LLM
+                const simplifiedData = currentAttendanceAggregates.map(student => {
+                    const studentSummary = {
+                        RollNo: student.roll_number,
+                        Name: student.name,
+                        OverallPercentage: student.overall_total_hours > 0 ? ((student.overall_present_hours / student.overall_total_hours) * 100).toFixed(1) + '%' : '0%',
+                        Subjects: {}
+                    };
+                    const subjectDisplayOrder = ['discrete_maths', 'business_economics', 'operating_systems', 'dbms', 'software_engineering', 'os_lab', 'dbms_lab', 'rtrp', 'nrd_lab', 'constitution'];
+                    subjectDisplayOrder.forEach(subjKey => {
+                        const present = student[`${subjKey}_present_hours`] || 0;
+                        const total = student[`${subjKey}_total_hours`] || 0;
+                        studentSummary.Subjects[formatSubjectName(subjKey)] = total > 0 ? ((present / total) * 100).toFixed(1) + '%' : '0%';
+                    });
+                    return studentSummary;
+                });
+
+                const prompt = `Given the following student attendance data:\n\n${JSON.stringify(simplifiedData, null, 2)}\n\nPlease provide a concise summary of the class's attendance performance. Highlight general trends, subjects with notably high/low attendance, and mention any students with overall attendance below 75%. Also, suggest 2-3 actionable insights for improving attendance. Format the output as a brief report.`;
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // Leave as-is for Canvas environment, API key will be provided at runtime.
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                showLoadingBar(true, 50);
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                showLoadingBar(true, 90);
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    llmSummaryTextP.textContent = text;
+                    showStatusMessage('AI insights generated successfully!', 'success');
+                } else {
+                    llmSummaryTextP.textContent = 'Failed to generate insights. No valid response from AI.';
+                    showStatusMessage('AI insights generation failed.', 'error');
+                    console.error('LLM response structure unexpected:', result);
+                }
+            } catch (err) {
+                llmSummaryTextP.textContent = `Error generating insights: ${err.message}`;
+                showStatusMessage(`Error: ${err.message}`, 'error');
+                console.error('Error calling Gemini API:', err);
+            } finally {
+                showLoadingBar(false);
+            }
+        }
+
+
+        // --- Excel Export ---
+        /**
+         * Exports an HTML table to an Excel file.
+         * @param {string} tableID - The ID of the table to export.
+         * @param {string} filename - The base filename for the Excel file.
+         */
+        function exportTableToExcel(tableID, filename = 'Report') {
+            const table = document.getElementById(tableID);
+            if (!table) {
+                showStatusMessage('Cannot find table to export.', 'error');
+                return;
+            }
+            try {
+                const wb = XLSX.utils.table_to_book(table, { sheet: "AttendanceReport" });
+                XLSX.writeFile(wb, filename + '_' + new Date().toISOString().slice(0,10) + '.xlsx');
+                showGenericSuccessPopup('Excel Exported', `${filename}.xlsx has been downloaded.`);
+            } catch (err) {
+                 showStatusMessage('Error exporting to Excel: ' + err.message, 'error');
+                 console.error("Excel export error:", err);
+            }
+        }
+        
+        /**
+         * Determines which report table is currently visible and triggers its download as Excel.
+         */
+        function downloadCurrentReportAsExcel() {
+            let tableIdToExport = '';
+            const fullReportTable = document.getElementById('fullAttendanceReportTable');
+            const sessionReportTable = document.getElementById('currentSessionReportTable');
+
+            // Check if tables exist and are visible (offsetParent is null if display:none)
+            if (fullReportTable && fullReportTable.offsetParent !== null) {
+                 tableIdToExport = 'fullAttendanceReportTable';
+            } else if (sessionReportTable && sessionReportTable.offsetParent !== null) {
+                 tableIdToExport = 'currentSessionReportTable';
+            }
+
+            if (tableIdToExport) {
+                exportTableToExcel(tableIdToExport, 'Attendance_Report');
+            } else {
+                showStatusMessage('No report table is currently displayed to download.', 'error');
+            }
+        }
+
+
+        // --- Helper Functions (Formatting, etc.) ---
+        /**
+         * Formats a subject key into a more readable name.
+         * @param {string} subjectKey - The subject key (e.g., 'discrete_maths').
+         * @returns {string} The formatted subject name.
+         */
+        function formatSubjectName(subjectKey) {
+            const nameMap = {
+                'discrete_maths': 'Discrete Mathematics', 'business_economics': 'Business Economics', 'operating_systems': 'Operating Systems', 'dbms': 'DBMS', 'software_engineering': 'Software Engineering', 'os_lab': 'OS Lab', 'dbms_lab': 'DBMS Lab', 'rtrp': 'RTRP', 'nrd_lab': 'NRD Lab', 'constitution': 'Constitution'
+            };
+            return nameMap[subjectKey] || subjectKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+        }
+        
+        // --- Initial Setup on DOMContentLoaded ---
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('DOM fully loaded. Initializing...');
+            displayCurrentDate();
+            
+            // Only proceed with Supabase operations if the client was successfully initialized
+            if (supabase) {
+                await speedPopulateStudents(); // Fetch and display students from Supabase
+                setupFastButtons();
+                
+                // Test Supabase connection by trying to select from 'students' table
+                supabase.from('students').select('roll_number', { count: 'exact', head: true })
+                    .then(({ error, count }) => {
+                        if (error && error.code !== '42P01') { // '42P01' means table does not exist, which is a soft error
+                             console.warn("Supabase connection test warning (may be normal if 'students' table doesn't exist yet):", error.message);
+                             showStatusMessage("Supabase connected. Table 'students' might be missing or inaccessible.", 'info');
+                        } else if (error && error.code === '42P01'){
+                            console.log("Supabase connected, but 'students' table not found. Consider populating.");
+                            showStatusMessage("Supabase connected. 'students' table missing. Use 'Populate Initial Students' button.", 'info');
+                        } else {
+                            console.log('Supabase connection test successful. Student count (approx):', count);
+                            showStatusMessage('Supabase connected successfully.', 'success');
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Supabase connection test failed:", err);
+                        showStatusMessage('Supabase connection failed. App cannot function.', 'error');
+                        document.getElementById('rollNumberContainer').innerHTML = '<p style="color:red;">Supabase connection failed. App cannot function.</p>';
+                    });
+            } else {
+                // Supabase was not initialized, error message already displayed
+                document.getElementById('rollNumberContainer').innerHTML = '<p style="color:red;">Supabase client failed to initialize. Please check console for details.</p>';
+            }
+        });
+
+    </script>
+</body>
+</html>

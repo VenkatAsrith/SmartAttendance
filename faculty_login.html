@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Update Supabase JS import to use createClient -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #2B4570;
+            --secondary: #81D8F7;
+            --accent: #E5E4E2;
+            --background: #F4F4F4;
+            --text: #2C3E50;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: var(--background);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--accent);
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(129, 216, 247, 0.3);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .login-btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Faculty Login</h1>
+            <p>Enter your credentials to access the portal</p>
+        </div>
+        <form id="loginForm" onsubmit="return handleLogin(event)">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="login-btn">Login</button>
+        </form>
+    </div>
+
+    <script>
+        // Create Supabase client properly
+        const { createClient } = supabase;
+        const supabaseUrl = 'https://trroxlaourgjylaeemnf.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycm94bGFvdXJnanlsYWVlbW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczODA2MzAsImV4cCI6MjA2Mjk1NjYzMH0.RpI2RSr1Zq6WMVNzlTtTEK9dWmn_Ytd5a1TKB2gtnPI';
+        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // Sign in with email and password using Supabase
+                const { data: { user }, error: signInError } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (signInError) {
+                    alert("Login failed: " + signInError.message);
+                    return;
+                }
+
+                if (user) {
+                    // Update last_login_at in faculty table
+                    const { error: updateError } = await supabaseClient
+                        .from('faculty')
+                        .update({ last_login_at: new Date().toISOString() })
+                        .eq('id', user.id);
+
+                    if (updateError) {
+                        console.error("Error updating last login:", updateError.message);
+                    }
+
+                    // Redirect to faculty profile page
+                    window.location.href = 'faculty_profile.html';
+                }
+            } catch (error) {
+                alert("An error occurred: " + error.message);
+            }
+
+            return false;
+        }
+    </script>
+</body>
+</html>

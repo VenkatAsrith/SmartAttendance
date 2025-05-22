@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JNTUH Sultanpur - Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        /* Add these styles for the modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--primary-color);
+            margin: 15% auto;
+            padding: 20px;
+            border: 2px solid var(--secondary-color);
+            border-radius: 10px;
+            width: 70%;
+            max-width: 800px;
+            position: relative;
+        }
+
+        .close-modal {
+            color: var(--secondary-color);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-title {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+        }
+
+        .modal-text {
+            color: var(--white);
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        :root {
+            --primary-color: #1a1a1a;
+            --secondary-color: #d4af37;
+            --accent-color: #b8860b;
+            --text-color: #ffffff;
+            --light-bg: #2a2a2a;
+            --white: #ffffff;
+            --gradient-1: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            --gradient-2: linear-gradient(135deg, #d4af37 0%, #b8860b 100%);
+        }
+
+        body {
+            background: var(--primary-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            perspective: 1000px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+
+        .navbar:hover {
+            transform: translateZ(10px);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transform-style: preserve-3d;
+        }
+
+        .logo h2 {
+            color: var(--secondary-color);
+            font-size: 1.8rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-2);
+            transform: translateZ(-5px);
+            transition: transform 0.4s ease;
+            z-index: -1;
+            opacity: 0;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+            transform: translateY(-5px) translateZ(10px);
+        }
+
+        .nav-links a:hover::before {
+            transform: translateZ(0);
+            opacity: 1;
+        }
+
+        .hero-section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                        url('Jntuh-1.jpg');
+            background-size: cover;
+            background-position: center;
+            animation: zoomIn 20s forwards;
+            transform: translateZ(-50px);
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(1) translateZ(-50px); }
+            to { transform: scale(1.1) translateZ(-30px); }
+        }
+
+        .hero-content {
+            position: relative;
+            text-align: center;
+            color: var(--white);
+            z-index: 1;
+            animation: fadeInUp 1s ease;
+            transform-style: preserve-3d;
+            padding: 0 2rem;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-content h1 {
+            font-size: 4.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            transform: translateZ(20px);
+            color: var(--secondary-color);
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .hero-content p {
+            font-size: 1.4rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            transform: translateZ(15px);
+            color: var(--white);
+            line-height: 1.6;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            transform-style: preserve-3d;
+        }
+
+        .btn {
+            padding: 1.2rem 2.5rem;
+            border: 2px solid var(--secondary-color);
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+            color: var(--secondary-color);
+            background: transparent;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-2);
+            transform: translateZ(-5px);
+            transition: transform 0.4s ease;
+            z-index: -1;
+            opacity: 0;
+        }
+
+        .btn:hover {
+            transform: translateY(-5px) translateZ(10px);
+            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2);
+            color: var(--primary-color);
+        }
+
+        .btn:hover::before {
+            transform: translateZ(0);
+            opacity: 1;
+        }
+
+        .features-section {
+            padding: 8rem 2rem;
+            background: var(--white);
+            transform-style: preserve-3d;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: var(--light-bg);
+            padding: 2.5rem;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-1);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            z-index: -1;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-15px) rotateX(10deg);
+            color: var(--white);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.5s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.2) rotateY(180deg);
+        }
+
+        .gallery-section {
+            padding: 8rem 2rem;
+            background: var(--primary-color);
+            transform-style: preserve-3d;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
+            aspect-ratio: 16/9;
+            transform-style: preserve-3d;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            border: 2px solid var(--secondary-color);
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-10px) rotateX(10deg);
+            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.2);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.2);
+        }
+
+        .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(26, 26, 26, 0.9));
+            padding: 2rem;
+            color: var(--white);
+            transform: translateY(100%);
+            transition: transform 0.4s ease;
+        }
+
+        .gallery-item:hover .gallery-overlay {
+            transform: translateY(0);
+        }
+
+        .gallery-overlay h3 {
+            color: var(--secondary-color);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .hostel-details {
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .hostel-details ul {
+            list-style-type: none;
+            padding: 0;
+            text-align: left;
+        }
+
+        .hostel-details ul li {
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+            color: var(--white);
+        }
+
+        .gallery-overlay p {
+            color: var(--white);
+            font-size: 1rem;
+        }
+
+        .footer {
+            background: var(--gradient-1);
+            color: var(--white);
+            padding: 4rem 2rem;
+            text-align: center;
+            transform-style: preserve-3d;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            transform: translateZ(20px);
+        }
+
+        .footer-section h3 {
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.8rem;
+            color: var(--white);
+        }
+
+        .footer-section a {
+            color: var(--white);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: var(--secondary-color);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .social-links a {
+            color: var(--secondary-color);
+            font-size: 1.8rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: inline-block;
+            transform-style: preserve-3d;
+        }
+
+        .social-links a:hover {
+            transform: translateY(-5px) rotateY(180deg);
+            color: var(--white);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+            }
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotateX(0deg); }
+            50% { transform: translateY(-20px) rotateX(10deg); }
+            100% { transform: translateY(0px) rotateX(0deg); }
+        }
+
+        .floating {
+            animation: float 6s forwards;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <h2>JNTUH Sultanpur</h2>
+        </div>
+        <div class="nav-links">
+            <a href="faculty_login.html">Faculty Portal</a>
+            <a href="student_login.html">Student Portal</a>
+            <a href="#about">About</a>
+        </div>
+    </nav>
+
+    <section class="hero-section" id="home">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <h1 class="floating">Welcome to JNTUH Sultanpur</h1>
+            <p>Established in 2012, JNTUH College of Engineering Sultanpur aspires to nurture academic excellence, foster values, create civic responsibility, and build global competencies in a dynamic environment.</p>
+            <div class="cta-buttons">
+                <a href="faculty_login.html" class="btn">
+                    <i class="fas fa-user-tie"></i> Faculty Portal
+                </a>
+                <a href="student_login.html" class="btn">
+                    <i class="fas fa-user-graduate"></i> Student Portal
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section class="features-section" id="features">
+        <div class="section-title">
+            <h2>Our Features</h2>
+            <p>Excellence in Education and Infrastructure</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fas fa-graduation-cap feature-icon"></i>
+                <h3>Quality Education</h3>
+                <p>Premier departments with excellent infrastructure and full-time qualified faculty <mcreference link="https://jntuhces.ac.in/" index="1">1</mcreference></p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-laptop-code feature-icon"></i>
+                <h3>Modern Infrastructure</h3>
+                <p>160-acre campus with department blocks, library, solar panel unit, sports complex, and gym <mcreference link="https://www.careers360.com/colleges/jntuh-college-of-engineering-sultanpur" index="2">2</mcreference></p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-bus feature-icon"></i>
+                <h3>Transportation</h3>
+                <p>Convenient bus service from JNTUH Kukatpally campus for hassle-free commute <mcreference link="https://collegedunia.com/college/57826-jntuh-college-of-engineering-sultanpur-jntuhces-sangareddy" index="3">3</mcreference></p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-users feature-icon"></i>
+                <h3>Placement Support</h3>
+                <p>Active placement cell with top recruiters including WPS, Wipro, and TCS <mcreference link="https://collegedunia.com/college/57826-jntuh-college-of-engineering-sultanpur-jntuhces-sangareddy" index="3">3</mcreference></p>
+            </div>
+        </div>
+    </section>
+
+    <section class="gallery-section" id="gallery">
+        <div class="section-title">
+            <h2>Campus Gallery</h2>
+            <p>Explore our beautiful campus</p>
+        </div>
+        <div class="gallery-grid">
+            <div class="gallery-item">
+                <img src="Jntuh-1.jpg" alt="College Building">
+                <div class="gallery-overlay">
+                    <h3>College Campus</h3>
+                    <p>Explore our state-of-the-art facilities</p>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="BoysHostel.jpg" alt="Boys Hostel">
+                <div class="gallery-overlay">
+                    <h3>Boys Hostel</h3>
+                    <p>Modern Accommodation Facilities</p>
+                    <div class="hostel-details">
+                        <ul>
+                            <li>Spacious and well-maintained rooms</li>
+                            <li>24/7 security surveillance</li>
+                            <li>High-speed internet connectivity</li>
+                            <li>Modern amenities and facilities</li>
+                            <li>Dedicated study areas</li>
+                            <li>Recreation facilities</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="Girls Hostel.jpg" alt="Girls Hostel">
+                <div class="gallery-overlay">
+                    <h3>Girls Hostel</h3>
+                    <p>Safe and Comfortable Living Space</p>
+                    <div class="hostel-details">
+                        <ul>
+                            <li>Secure accommodation with 24/7 surveillance</li>
+                            <li>Well-furnished rooms</li>
+                            <li>Dedicated study spaces</li>
+                            <li>High-speed internet access</li>
+                            <li>Modern amenities</li>
+                            <li>Recreation facilities</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <ul>
+                    <li><i class="fas fa-map-marker-alt"></i> Sultanpur, Pulkal, Sangareddy District, Telangana <mcreference link="https://www.careers360.com/colleges/jntuh-college-of-engineering-sultanpur" index="2">2</mcreference></li>
+                    <li><i class="fas fa-phone"></i> Contact Administration</li>
+                    <li><i class="fas fa-envelope"></i> info@jntuhces.ac.in</li>
+          </ul>
+        </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#gallery">Gallery</a></li>
+          </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+      </footer>
+
+    <script>
+// Place all your JavaScript here, only declare 'observer' and 'modal' ONCE
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                if(this.getAttribute('href') === '#about') return; // Let modal handle About
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // 3D Parallax Effect
+        document.addEventListener('mousemove', (e) => {
+            const cards = document.querySelectorAll('.gallery-item');
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                card.style.transform = `
+                    perspective(1000px)
+                    rotateX(${(y - rect.height/2) / 20}deg)
+                    rotateY(${-(x - rect.width/2) / 20}deg)
+                    translateZ(10px)
+                `;
+            });
+        });
+
+        // Single IntersectionObserver instance
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0) translateZ(0)';
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        // Observe gallery items
+        document.querySelectorAll('.gallery-item').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px) translateZ(-20px)';
+            el.style.transition = 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            observer.observe(el);
+        });
+
+        // Modal functionality
+        const modal = document.getElementById('aboutModal');
+        const aboutLink = document.querySelector('a[href="#about"]');
+        const closeModal = document.querySelector('.close-modal');
+
+        if (aboutLink && modal && closeModal) {
+            aboutLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                modal.style.display = 'block';
+            });
+
+            closeModal.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+
+            window.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+</script>
+</body>
+</html>
+  

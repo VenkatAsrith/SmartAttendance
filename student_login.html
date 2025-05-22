@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JNTUH Student Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://unpkg.com/@supabase/supabase-js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .logo {
+            width: 120px;
+            height: auto;
+            margin-bottom: 1.5rem;
+        }
+
+        .login-header {
+            margin-bottom: 2rem;
+        }
+
+        .login-header h1 {
+            color: #2B4570;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e1e5ea;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .form-group input:focus {
+            border-color: #2B4570;
+            box-shadow: 0 0 0 3px rgba(43, 69, 112, 0.1);
+            outline: none;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: #2B4570;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .login-btn:hover {
+            background: #1a2d4a;
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .loading {
+            position: relative;
+        }
+
+        .loading:after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            position: absolute;
+            right: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <img src="jntuhlogo.jpg" alt="JNTUH Logo" class="logo">
+        <div class="login-header">
+            <h1>Student Login</h1>
+            <p>Enter your roll number to view attendance</p>
+        </div>
+        <form id="loginForm">
+            <div class="form-group">
+                <input type="text" 
+                       id="rollno" 
+                       name="rollno" 
+                       placeholder="Roll Number (e.g., 23SS1A0501)" 
+                       required 
+                       pattern="^\d{2}SS1A\d{4}$"
+                       title="Please enter a valid roll number (e.g., 23SS1A0501)"
+                       autocomplete="off">
+                <div id="errorMessage" class="error-message"></div>
+            </div>
+            <button type="submit" class="login-btn" id="submitBtn">
+                <i class="fas fa-sign-in-alt"></i> View Attendance
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // DOM Elements - Move to top of script
+        const loginForm = document.getElementById('loginForm');
+        const rollnoInput = document.getElementById('rollno');
+        const submitBtn = document.getElementById('submitBtn');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Initialize Supabase client
+        const { createClient } = supabase;
+        const supabaseUrl = 'https://trroxlaourgjylaeemnf.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycm94bGFvdXJnanlsYWVlbW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczODA2MzAsImV4cCI6MjA2Mjk1NjYzMH0.RpI2RSr1Zq6WMVNzlTtTEK9dWmn_Ytd5a1TKB2gtnPI';
+        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+    
+        // Handle login function
+        async function handleLogin(event) {
+            event.preventDefault();
+            const rollno = rollnoInput.value.trim().toUpperCase();
+    
+            // Reset UI state
+            errorMessage.textContent = '';
+            submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
+    
+            try {
+                // Validate roll number format first
+                if (!validateRollNumber(rollno)) {
+                    throw new Error('Please enter a valid roll number (e.g., 23SS1A0501)');
+                }
+    
+                // Check if student exists in the database with timeout
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Request timed out')), 5000));
+    
+                const fetchPromise = supabaseClient
+                    .from('students')
+                    .select('*')
+                    .eq('roll_number', rollno)
+                    .single();
+    
+                const { data: student, error } = await Promise.race([fetchPromise, timeoutPromise]);
+    
+                if (error) {
+                    if (error.message === 'Request timed out') {
+                        throw new Error('Connection is slow. Please try again.');
+                    }
+                    throw error;
+                }
+    
+                if (!student) {
+                    throw new Error('Student not found. Please check your roll number.');
+                }
+    
+                // Redirect to profile page with roll number
+                window.location.href = `student_profile_fixed.html?rollno=${encodeURIComponent(rollno)}`;
+    
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMessage.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error.message || 'Invalid roll number'}`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('loading');
+            }
+        }
+    
+        // Validate roll number format
+        function validateRollNumber(rollno) {
+            return /^\d{2}SS1A\d{4}$/.test(rollno);
+        }
+    
+        // Add event listeners
+        loginForm.addEventListener('submit', handleLogin);
+    
+        // Clear error message when user starts typing
+        rollnoInput.addEventListener('input', () => {
+            errorMessage.textContent = '';
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body {
+            background: #F4F4F4;
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .profile-container {
+            background: white;
+            padding: 2rem 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        .profile-pic {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #81D8F7;
+            margin-bottom: 1rem;
+        }
+        .student-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2B4570;
+            margin-bottom: 0.2rem;
+        }
+        .student-roll {
+            color: #666;
+            margin-bottom: 1.2rem;
+        }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+        .report-table th, .report-table td {
+            padding: 0.7rem 0.5rem;
+            border: 1px solid #E5E4E2;
+            text-align: center;
+        }
+        .report-table th {
+            background: #2B4570;
+            color: white;
+        }
+        .report-table tr:nth-child(even) {
+            background: #F4F4F4;
+        }
+        .low-attendance {
+            background-color: rgba(255, 0, 0, 0.1);
+            color: #d9534f;
+        }
+        .back-btn {
+            margin-top: 2rem;
+            background: #2B4570;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 0.7rem 1.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+        .back-btn:hover {
+            background: #81D8F7;
+            color: #2B4570;
+        }
+
+        .search-container {
+            display: flex;
+            margin-bottom: 1rem;
+            gap: 10px;
+        }
+
+        .search-container input {
+            flex-grow: 1;
+            padding: 0.5rem;
+            border: 1px solid #2B4570;
+            border-radius: 5px;
+        }
+
+        .search-btn {
+            background: #2B4570;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .search-btn:hover {
+            background: #81D8F7;
+            color: #2B4570;
+        }
+
+        .total-attendance {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background: #f4f4f4;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .total-attendance.low-attendance {
+            background-color: rgba(255, 0, 0, 0.1);
+            color: #d9534f;
+        }
+
+        .student-details {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .student-details > div {
+            margin: 0.25rem 0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <img src="IMG_20250314_124405994.jpg" alt="Profile Picture" class="profile-pic">
+        <div class="student-details">
+            <div class="student-name" id="studentName">Student Name</div>
+            <div class="student-roll" id="studentRoll">Roll No: </div>
+            <div class="student-dept" id="studentDept">Department: </div>
+            <div class="student-sem" id="studentSem">Semester: </div>
+        </div>
+        <h3 style="margin-top:1.5rem; color:#2B4570;">Attendance Report</h3>
+        <div class="search-container">
+            <input type="text" id="rollNoInput" placeholder="Enter Roll Number">
+            <button onclick="fetchStudentAttendance()" class="search-btn">Search</button>
+        </div>
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>Subject Code</th>
+                    <th>Subject Name</th>
+                    <th>Classes Held</th>
+                    <th>Attended</th>
+                    <th>Attendance %</th>
+                </tr>
+            </thead>
+            <tbody id="reportBody">
+                <!-- Data will be filled by JS -->
+            </tbody>
+        </table>
+        <div id="totalAttendance" class="total-attendance"></div>
+        <button class="back-btn" onclick="window.location.href='index.html'">
+            <i class="fas fa-arrow-left"></i> Back to Home
+        </button>
+    </div>
+    <script>
+        // Firebase configuration (from faculty_attendance.html)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBTOvD5Y1-RqPdOLdWPZqxkVMBAOJqVlDU",
+            authDomain: "jntuh-attendance.firebaseapp.com",
+            databaseURL: "https://jntuh-attendance-default-rtdb.firebaseio.com",
+            projectId: "jntuh-attendance",
+            storageBucket: "jntuh-attendance.appspot.com",
+            messagingSenderId: "1057980305670",
+            appId: "1:1057980305670:web:a925a5d04c6a8f9a7b8f1a"
+        };
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        // Student data variables
+        let studentData = null;
+        let firebaseStudentData = null;
+
+        // Fetch student attendance from Firebase with fallback to local JSON
+        async function fetchStudentAttendanceData(rollno) {
+            try {
+                // Try Firebase first
+                const database = firebase.database();
+                const attendanceRef = database.ref(`attendance/${rollno}`);
+                const snapshot = await attendanceRef.once('value');
+                return snapshot.exists() ? snapshot.val() : null;
+            } catch (error) {
+                console.error('Error fetching from Firebase, trying local data...', error);
+                
+                // Fallback to local JSON
+                try {
+                    const response = await fetch('student_attendance.json');
+                    const data = await response.json();
+                    const student = data.students.find(s => s.rollNo.toUpperCase() === rollno.toUpperCase());
+                    return student ? { subjects: student.subjects } : null;
+                } catch (err) {
+                    console.error('Error fetching local student data:', err);
+                    return null;
+                }
+            }
+        }
+
+        // Calculate attendance percentage
+        function calculateAttendancePercentage(attended, total) {
+            if (total === 0) return 0;
+            return Math.round((attended / total) * 100);
+        }
+
+        // Check if attendance is low (below 75%)
+        function isLowAttendance(percentage) {
+            return percentage < 75;
+        }
+
+        // Display warning for low attendance
+        function showAttendanceWarning() {
+            const warningDiv = document.createElement('div');
+            warningDiv.id = 'attendanceWarning';
+            warningDiv.style.color = '#d9534f';
+            warningDiv.style.margin = '1rem 0';
+            warningDiv.style.padding = '0.75rem';
+            warningDiv.style.backgroundColor = '#fff3f3';
+            warningDiv.style.borderRadius = '5px';
+            warningDiv.style.borderLeft = '4px solid #d9534f';
+            warningDiv.innerHTML = `
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Warning:</strong> Your attendance is below 75% in some subjects. Please attend classes regularly to avoid detention.
+            `;
+            
+            const container = document.querySelector('.profile-container');
+            const table = document.querySelector('.report-table');
+            container.insertBefore(warningDiv, table);
+        }
+
+        // Fetch and display student attendance
+        async function fetchStudentAttendance(rollno = '') {
+            const rollnoInput = document.getElementById('rollNoInput');
+            const rollnoToFetch = rollno || (rollnoInput ? rollnoInput.value.trim().toUpperCase() : '');
+
+            // Reset previous state
+            document.getElementById('reportBody').innerHTML = '';
+            document.getElementById('totalAttendance').textContent = '';
+            document.getElementById('errorMessage')?.remove();
+            document.getElementById('attendanceWarning')?.remove();
+
+            // Validate roll number
+            if (!validateRollNumber(rollnoToFetch)) {
+                showErrorMessage('Please enter a valid roll number (e.g., 23SS1A0501)');
+                return;
+            }
+
+            try {
+                // Show loading state
+                const reportBody = document.getElementById('reportBody');
+                reportBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Loading attendance data...</td></tr>';
+
+                // Fetch attendance data
+                const attendanceData = await fetchStudentAttendanceData(rollnoToFetch);
+                
+                if (!attendanceData || !attendanceData.subjects) {
+                    throw new Error('No attendance data found for this student');
+                            name: subjectData.name || 'Unknown Subject',
+                            classesHeld: subjectData.classesHeld || 0,
+                            classesAttended: subjectData.classesAttended || 0
+                        }))
+                    };
+                }
+            }
+
+            // Display student details or error
+            if (!student) {
+                showErrorMessage('No student found with this Roll Number');
+                return;
+            }
+
+            // Update student details
+            document.getElementById('studentName').textContent = student.name;
+            document.getElementById('studentRoll').textContent = `Roll No: ${student.rollNo}`;
+            document.getElementById('studentDept').textContent = `Department: ${student.department}`;
+            document.getElementById('studentSem').textContent = `Semester: ${student.semester}`;
+
+            // Fill attendance report
+            const reportBody = document.getElementById('reportBody');
+            const totalAttendance = document.getElementById('totalAttendance');
+            reportBody.innerHTML = ''; // Clear previous data
+
+            let totalClassesHeld = 0;
+            let totalClassesAttended = 0;
+
+            // Populate subjects
+            student.subjects.forEach(subject => {
+                const attendancePercent = ((subject.classesAttended / subject.classesHeld) * 100).toFixed(1);
+                
+                const tr = document.createElement('tr');
+                tr.className = attendancePercent < 75 ? 'low-attendance' : '';
+                
+                tr.innerHTML = `
+                    <td>${subject.code}</td>
+                    <td>${subject.name}</td>
+                    <td>${subject.classesHeld}</td>
+                    <td>${subject.classesAttended}</td>
+                    <td>${attendancePercent}%</td>
+                `;
+                
+                reportBody.appendChild(tr);
+
+                // Update totals
+                totalClassesHeld += subject.classesHeld;
+                totalClassesAttended += subject.classesAttended;
+            });
+
+            // Calculate and display total attendance
+            const overallAttendancePercent = ((totalClassesAttended / totalClassesHeld) * 100).toFixed(1);
+            totalAttendance.innerHTML = `
+                <strong>Total Attendance: ${totalClassesAttended} / ${totalClassesHeld} (${overallAttendancePercent}%)</strong>
+            `;
+            totalAttendance.className = `total-attendance ${overallAttendancePercent < 75 ? 'low-attendance' : ''}`;
+
+            // Optional: Update Firebase with latest attendance if needed
+            try {
+                const database = firebase.database();
+                const studentRef = database.ref(`students/${rollno}`);
+                await studentRef.update({
+                    totalClassesHeld: totalClassesHeld,
+                    totalClassesAttended: totalClassesAttended,
+                    overallAttendancePercent: parseFloat(overallAttendancePercent)
+                });
+            } catch (error) {
+                console.error('Error updating Firebase attendance:', error);
+            }
+        }
+
+        // Optional: Fetch attendance if roll number is in URL
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const rollno = urlParams.get('rollno');
+            
+            if (rollno) {
+                document.getElementById('rollNoInput').value = rollno;
+                fetchStudentAttendance();
+            }
+        });
+
+        // Comprehensive student data with attendance
+        const studentAttendance = {
+            '23SS1A0501': {
+                name: 'ABDUL AHAD',
+                subjects: [
+                    { name: 'Discrete Mathematics', held: 40, attended: 36 },
+                    { name: 'Business Economics', held: 38, attended: 34 },
+                    { name: 'Operating Systems', held: 42, attended: 39 },
+                    { name: 'DBMS', held: 41, attended: 40 },
+                    { name: 'Software Engineering', held: 37, attended: 35 }
+                ]
+            },
+            '23SS1A0502': {
+                name: 'ANURADHA KUMARI JHA',
+                subjects: [
+                    { name: 'Discrete Mathematics', held: 40, attended: 38 },
+                    { name: 'Business Economics', held: 38, attended: 36 },
+                    { name: 'Operating Systems', held: 42, attended: 41 },
+                    { name: 'DBMS', held: 41, attended: 39 },
+                    { name: 'Software Engineering', held: 37, attended: 36 }
+                ]
+            },
+            '23SS1A0503': {
+                name: 'ARRAMONI ARAVIND',
+                subjects: [
+                    { name: 'Discrete Mathematics', held: 40, attended: 35 },
+                    { name: 'Business Economics', held: 38, attended: 33 },
+                    { name: 'Operating Systems', held: 42, attended: 38 },
+                    { name: 'DBMS', held: 41, attended: 37 },
+                    { name: 'Software Engineering', held: 37, attended: 34 }
+                ]
+            },
+            '23SS1A0535': {
+                name: 'KONAM VENKAT ASRITH',
+                subjects: [
+                    { name: 'Discrete Mathematics', held: 40, attended: 39 },
+                    { name: 'Business Economics', held: 38, attended: 37 },
+                    { name: 'Operating Systems', held: 42, attended: 40 },
+                    { name: 'DBMS', held: 41, attended: 41 },
+                    { name: 'Software Engineering', held: 37, attended: 36 }
+                ]
+            }
+        };
+
+        // Function to validate roll number
+        function validateRollNumber(rollno) {
+            const rollnoRegex = /^\d{2}SS1A\d{4}$/;
+            return rollnoRegex.test(rollno) && studentAttendance[rollno];
+        }
+
+        // Function to display error message
+        function showErrorMessage(message) {
+            const reportBody = document.getElementById('reportBody');
+            reportBody.innerHTML = `
+                <tr>
+                    <td colspan="4" style="color: red; text-align: center;">
+                        ${message}
+                    </td>
+                </tr>
+            `;
+            document.getElementById('studentName').textContent = 'Invalid Student';
+            document.getElementById('studentRoll').textContent = 'Roll No: N/A';
+        }
+
+        // Get rollno from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const rollno = urlParams.get('rollno');
+
+        // Check if roll number is valid
+        if (rollno && validateRollNumber(rollno)) {
+            const studentData = studentAttendance[rollno];
+            
+            // Set student name and roll
+            document.getElementById('studentRoll').textContent = `Roll No: ${rollno}`;
+            document.getElementById('studentName').textContent = studentData.name;
+
+            // Fill attendance report
+            const reportBody = document.getElementById('reportBody');
+            reportBody.innerHTML = ''; // Clear any existing rows
+
+            let totalHeld = 0;
+            let totalAttended = 0;
+
+            studentData.subjects.forEach(sub => {
+                const percent = ((sub.attended / sub.held) * 100).toFixed(1);
+                const tr = document.createElement('tr');
+                
+                // Highlight low attendance
+                const percentNum = parseFloat(percent);
+                const rowClass = percentNum < 75 ? 'low-attendance' : '';
+                
+                tr.className = rowClass;
+                tr.innerHTML = `
+                    <td>${sub.name}</td>
+                    <td>${sub.held}</td>
+                    <td>${sub.attended}</td>
+                    <td>${percent}%</td>
+                `;
+                reportBody.appendChild(tr);
+
+                // Update total
+                totalHeld += sub.held;
+                totalAttended += sub.attended;
+            });
+
+            // Add total row
+            const totalPercent = ((totalAttended / totalHeld) * 100).toFixed(1);
+            const totalTr = document.createElement('tr');
+            totalTr.innerHTML = `
+                <td><strong>Total</strong></td>
+                <td><strong>${totalHeld}</strong></td>
+                <td><strong>${totalAttended}</strong></td>
+                <td><strong>${totalPercent}%</strong></td>
+            `;
+            reportBody.appendChild(totalTr);
+        } else {
+            // Invalid or missing roll number
+            showErrorMessage('Please enter a valid roll number.');
+        }
+    </script>
+</body>
+</html>

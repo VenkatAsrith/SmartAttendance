@@ -1,0 +1,56 @@
+{
+    "students": [
+        {
+            "rollNo": "23SS1A0501",
+            "name": "ABDUL AHAD",
+            "department": "CSE",
+            "semester": "3rd",
+            "subjects": [
+                {"name": "Discrete Mathematics", "code": "CS301", "classesHeld": 40, "classesAttended": 36},
+                {"name": "Business Economics", "code": "HS302", "classesHeld": 38, "classesAttended": 34},
+                {"name": "Operating Systems", "code": "CS303", "classesHeld": 42, "classesAttended": 39},
+                {"name": "DBMS", "code": "CS304", "classesHeld": 41, "classesAttended": 40},
+                {"name": "Software Engineering", "code": "CS305", "classesHeld": 37, "classesAttended": 35}
+            ]
+        },
+        {
+            "rollNo": "23SS1A0502",
+            "name": "ANURADHA KUMARI JHA",
+            "department": "CSE",
+            "semester": "3rd",
+            "subjects": [
+                {"name": "Discrete Mathematics", "code": "CS301", "classesHeld": 40, "classesAttended": 38},
+                {"name": "Business Economics", "code": "HS302", "classesHeld": 38, "classesAttended": 36},
+                {"name": "Operating Systems", "code": "CS303", "classesHeld": 42, "classesAttended": 41},
+                {"name": "DBMS", "code": "CS304", "classesHeld": 41, "classesAttended": 39},
+                {"name": "Software Engineering", "code": "CS305", "classesHeld": 37, "classesAttended": 36}
+            ]
+        },
+        {
+            "rollNo": "23SS1A0503",
+            "name": "ARRAMONI ARAVIND",
+            "department": "CSE",
+            "semester": "3rd",
+            "subjects": [
+                {"name": "Discrete Mathematics", "code": "CS301", "classesHeld": 40, "classesAttended": 35},
+                {"name": "Business Economics", "code": "HS302", "classesHeld": 38, "classesAttended": 33},
+                {"name": "Operating Systems", "code": "CS303", "classesHeld": 42, "classesAttended": 38},
+                {"name": "DBMS", "code": "CS304", "classesHeld": 41, "classesAttended": 37},
+                {"name": "Software Engineering", "code": "CS305", "classesHeld": 37, "classesAttended": 34}
+            ]
+        },
+        {
+            "rollNo": "23SS1A0535",
+            "name": "KONAM VENKAT ASRITH",
+            "department": "CSE",
+            "semester": "3rd",
+            "subjects": [
+                {"name": "Discrete Mathematics", "code": "CS301", "classesHeld": 40, "classesAttended": 39},
+                {"name": "Business Economics", "code": "HS302", "classesHeld": 38, "classesAttended": 37},
+                {"name": "Operating Systems", "code": "CS303", "classesHeld": 42, "classesAttended": 40},
+                {"name": "DBMS", "code": "CS304", "classesHeld": 41, "classesAttended": 41},
+                {"name": "Software Engineering", "code": "CS305", "classesHeld": 37, "classesAttended": 36}
+            ]
+        }
+    ]
+}

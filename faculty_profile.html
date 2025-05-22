@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Profile - JNTUH Sultanpur</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style id="theme-style">
+        :root {
+            --primary: #2B4570;
+            --secondary: #81D8F7;
+            --accent: #E5E4E2;
+            --background: #F4F4F4;
+            --text: #2C3E50;
+        }
+        body.dark {
+            --primary: #22223b;
+            --secondary: #4a4e69;
+            --accent: #9a8c98;
+            --background: #232946;
+            --text: #eaeaea;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        body {
+            background: var(--background);
+            min-height: 100vh;
+            padding: 2rem;
+            color: var(--text);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 2rem;
+            color: white;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            opacity: 0.9;
+        }
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .theme-toggle {
+            background: var(--accent);
+            color: var(--primary);
+            border: none;
+            border-radius: 5px;
+            padding: 0.6rem 1.2rem;
+            margin-left: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s, color 0.3s;
+        }
+        .theme-toggle:hover {
+            background: var(--secondary);
+            color: white;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        body.dark .card, body.dark .news-section, body.dark .calendar-section {
+            background: #232946;
+            color: #eaeaea;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .card-content {
+            color: var(--text);
+        }
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .quick-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem;
+            background: var(--accent);
+            border-radius: 5px;
+            color: var(--text);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .quick-link:hover {
+            background: var(--secondary);
+            color: white;
+        }
+        .news-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+        .news-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--accent);
+        }
+        .news-item:last-child {
+            border-bottom: none;
+        }
+        .news-item h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        .news-item p {
+            color: var(--text);
+            opacity: 0.8;
+        }
+        .news-item .date {
+            font-size: 0.9rem;
+            color: var(--text);
+            opacity: 0.6;
+        }
+        .calendar-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 2rem;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .calendar-day {
+            text-align: center;
+            padding: 0.5rem;
+            border: 1px solid var(--accent);
+            border-radius: 5px;
+        }
+        .calendar-day.today {
+            background: var(--primary);
+            color: white;
+        }
+        .calendar-day.has-event {
+            border-color: var(--secondary);
+            background: rgba(129, 216, 247, 0.1);
+        }
+        .download-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1rem;
+            transition: background 0.3s;
+        }
+        .download-btn:hover {
+            background: var(--secondary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Welcome, <span id="facultyName">Loading...</span></h1>
+                <p>Computer Science Department</p>
+            </div>
+            <div>
+                <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-adjust"></i> Theme</button>
+                <button class="logout-btn" onclick="handleLogout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+        <div class="dashboard">
+            <div class="card">
+                <h2><i class="fas fa-users"></i> CSE 2nd Year</h2>
+                <div class="card-content">
+                    <div class="quick-links">
+                        <a href="faculty_attendance.html" class="quick-link">
+                            <i class="fas fa-user-check"></i> Mark Attendance
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h2><i class="fas fa-users"></i> CSE 3rd Year</h2>
+                <div class="card-content">
+                    <!-- No details as requested -->
+                </div>
+            </div>
+            <div class="card">
+                <h2><i class="fas fa-users"></i> CSE 4th Year</h2>
+                <div class="card-content">
+                    <!-- No details as requested -->
+                </div>
+            </div>
+            <div class="card">
+                <h2><i class="fas fa-download"></i> Reports</h2>
+                <div class="card-content">
+                    <button class="download-btn" onclick="downloadReport()">
+                        <i class="fas fa-file-download"></i> Download Attendance Report
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="news-section">
+            <h2><i class="fas fa-newspaper"></i> Latest Updates</h2>
+            <div class="news-item">
+                <h3>JNTUH Academic Calendar 2024 Released</h3>
+                <p>The academic calendar for the year 2024 has been released. Please check the important dates and events.</p>
+                <div class="date">March 15, 2024</div>
+            </div>
+            <div class="news-item">
+                <h3>Workshop on AI and Machine Learning</h3>
+                <p>Department of CSE is organizing a workshop on AI and Machine Learning. Interested students can register.</p>
+                <div class="date">March 14, 2024</div>
+            </div>
+            <div class="news-item">
+                <h3>Mid-Semester Examinations Schedule</h3>
+                <p>The schedule for mid-semester examinations has been published. Students are advised to check their timetables.</p>
+                <div class="date">March 13, 2024</div>
+            </div>
+        </div>
+        <div class="calendar-section">
+            <h2><i class="fas fa-calendar-alt"></i> Academic Calendar</h2>
+            <div class="calendar-grid">
+                <!-- Calendar days will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://trroxlaourgjylaeemnf.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycm94bGFvdXJnanlsYWVlbW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczODA2MzAsImV4cCI6MjA2Mjk1NjYzMH0.RpI2RSr1Zq6WMVNzlTtTEK9dWmn_Ytd5a1TKB2gtnPI';
+        const { createClient } = supabase;
+        const supabaseClient = createClient(supabaseUrl, supabaseKey);
+
+        // Function to get faculty name
+        async function getFacultyName() {
+            try {
+                // Get current user
+                const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+                if (userError) throw userError;
+
+                if (user) {
+                    // Query faculty table to get name
+                    const { data, error } = await supabaseClient
+                        .from('faculty')
+                        .select('name')
+                        .eq('id', user.id)
+                        .single();
+
+                    if (error) throw error;
+                    
+                    // Update the welcome message
+                    document.getElementById('facultyName').textContent = data.name || user.email;
+                }
+            } catch (error) {
+                console.error('Error fetching faculty name:', error);
+                document.getElementById('facultyName').textContent = 'Faculty Member';
+            }
+        }
+
+        // Function to handle logout
+        async function handleLogout() {
+            try {
+                const { error } = await supabaseClient.auth.signOut();
+                if (error) throw error;
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error('Error signing out:', error);
+                alert('Error signing out. Please try again.');
+            }
+        }
+
+        // Call getFacultyName when page loads
+        getFacultyName();
+
+        // Theme toggle
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+        }
+        // Download report stub
+        function downloadReport() {
+            alert('Attendance report download started!');
+        }
+        // Populate calendar
+        function populateCalendar() {
+            const calendarGrid = document.querySelector('.calendar-grid');
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            days.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day';
+                dayHeader.textContent = day;
+                calendarGrid.appendChild(dayHeader);
+            });
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            for (let i = 0; i < firstDay.getDay(); i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                calendarGrid.appendChild(emptyDay);
+            }
+            for (let i = 1; i <= lastDay.getDate(); i++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = i;
+                if (i === today.getDate()) {
+                    dayElement.classList.add('today');
+                }
+                if (i === 15 || i === 20) {
+                    dayElement.classList.add('has-event');
+                }
+                calendarGrid.appendChild(dayElement);
+            }
+        }
+        populateCalendar();
+    </script>
+</body>
+</html>
